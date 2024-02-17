@@ -1,7 +1,11 @@
 "use client";
 
 import { AppDispatch, useAppSelector } from "@/app/(state)/store";
-import { YTVideoSearchResult } from "@/app/yt-video-types";
+import {
+  PlaylistVideo,
+  YTVideo,
+  YTVideoSearchResult,
+} from "@/app/yt-video-types";
 import { MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
@@ -11,7 +15,11 @@ import {
 } from "../ui/dropdown-menu";
 
 import { useDispatch } from "react-redux";
-import { updatePlaylist } from "@/app/(state)/(slices)/playlist-slice";
+import {
+  PlaylistStatus,
+  updatePlaylist,
+  updatePlaylistStatus,
+} from "@/app/(state)/(slices)/playlist-slice";
 import { useToast } from "../ui/use-toast";
 import { ToastAction } from "../ui/toast";
 import { cn } from "@/lib/utils";
@@ -32,11 +40,11 @@ const ContentMoreButton = ({ content }: { content: YTVideoSearchResult }) => {
   ) {
     e.stopPropagation();
     var videoExists = false;
-    var videos: YTVideoSearchResult[] = [];
-    playlistVideos.forEach((video) => videos.push(video));
+    var videos: PlaylistVideo[] = [];
+    playlistVideos.forEach((video: PlaylistVideo) => videos.push(video));
 
     for (var i = 0; i < videos.length; i = i + 1) {
-      if (videos[i].id.videoId === video.id.videoId) {
+      if (videos[i].id === video.id.videoId) {
         showToast(
           "Something's not right",
           "Video already exists in the playlist"
@@ -47,7 +55,13 @@ const ContentMoreButton = ({ content }: { content: YTVideoSearchResult }) => {
     }
 
     if (!videoExists) {
-      videos.push(video);
+      const videoToAdd: PlaylistVideo = {
+        id: video.id.videoId,
+        title: video.snippet.title,
+        channelTitle: video.snippet.channelTitle,
+        thumbnails: video.snippet.thumbnails,
+      };
+      videos.push(videoToAdd);
       dispatch(updatePlaylist(videos));
       showToast("Success!", "Video has been added to the playlist");
     }
@@ -79,13 +93,13 @@ const ContentMoreButton = ({ content }: { content: YTVideoSearchResult }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem
-            id={`content-more-add-to-playlist-${content.id.videoId}`}
+            id={`content-more-add-to-playlist-${content.id}`}
             onClick={(e) => handleOnClickAddToPlaylist(e, content)}
           >
             Add to playlist
           </DropdownMenuItem>
           <DropdownMenuItem
-            id={`content-more-visit-channel-${content.id.videoId}`}
+            id={`content-more-visit-channel-${content.id}`}
             onClick={(e) => handleOnClickVisitChannel(e, content)}
           >
             Visit channel

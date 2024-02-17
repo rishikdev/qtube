@@ -1,7 +1,11 @@
 "use client";
 
 import { updateHomePageStatus } from "@/app/(state)/(slices)/home-page-slice";
-import { updateSearchResults } from "@/app/(state)/(slices)/search-slice";
+import {
+  updateNextPageToken,
+  updateSearchResults,
+  updateTotalResults,
+} from "@/app/(state)/(slices)/search-slice";
 import { AppDispatch } from "@/app/(state)/store";
 import { themeHoverGradientLeftStop } from "@/app/styles.module";
 import { cn } from "@/lib/utils";
@@ -17,16 +21,18 @@ const Brand = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   async function loadHomePage() {
-    // const response = await fetch("/api/search-results", {
-    //   method: "POST",
-    //   body: JSON.stringify({ searchQuery: "" }),
-    // });
-    // if (response.ok) {
-    //   const body = await response.json();
-    //   dispatch(updateSearchResults(body.searchResults));
-    dispatch(updateHomePageStatus());
-    dispatch(collapseNavbar(NavbarTrigger.Brand));
-    // }
+    const response = await fetch("/api/search-results", {
+      method: "POST",
+      body: JSON.stringify({ searchQuery: "", nextPageToken: "" }),
+    });
+    if (response.ok) {
+      const body = await response.json();
+      dispatch(updateSearchResults(body.searchResults));
+      dispatch(updateNextPageToken(body.nextPageToken));
+      dispatch(updateTotalResults(body.totalResults));
+      dispatch(updateHomePageStatus());
+      dispatch(collapseNavbar(NavbarTrigger.Brand));
+    }
   }
 
   return (

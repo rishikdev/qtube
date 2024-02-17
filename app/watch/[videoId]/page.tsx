@@ -13,7 +13,7 @@ const WatchVideo = ({ params }: { params: { videoId: string } }) => {
       >
         <Navbar />
         <div className="mt-[4rem] h-full w-full duration-500 ease-in-out transition-all">
-          <WatchPage videoId={params.videoId} />
+          <WatchPage videoIds={params.videoId} />
         </div>
       </ThemeProvider>
     </div>

@@ -8,6 +8,8 @@ interface SearchBarState {
     searchQuery: string;
     searchSuggestions: string[];
     searchResults: YTVideoSearchResult[];
+    nextPageToken: string;
+    totalResults: number;
   };
 }
 
@@ -16,6 +18,8 @@ const initialState: SearchBarState = {
     searchQuery: "",
     searchSuggestions: [],
     searchResults: [],
+    nextPageToken: "",
+    totalResults: 0,
   },
 };
 
@@ -23,17 +27,28 @@ export const searchSlice = createSlice({
   name: "searchSlice",
   initialState,
   reducers: {
-    updateSearchQuery: (state, action: PayloadAction<string>) => {
-      state.value.searchQuery = action.payload;
+    updateSearchQuery: (state, newSearchQuery: PayloadAction<string>) => {
+      state.value.searchQuery = newSearchQuery.payload;
     },
-    updateSearchSuggestions: (state, action: PayloadAction<string[]>) => {
-      state.value.searchSuggestions = action.payload;
+    updateSearchSuggestions: (
+      state,
+      newSearchSuggestions: PayloadAction<string[]>
+    ) => {
+      state.value.searchSuggestions = newSearchSuggestions.payload;
     },
     updateSearchResults: (
       state,
-      action: PayloadAction<YTVideoSearchResult[]>
+      newSearchResults: PayloadAction<YTVideoSearchResult[]>
     ) => {
-      state.value.searchResults = action.payload;
+      state.value.searchResults = newSearchResults.payload;
+    },
+
+    updateNextPageToken: (state, nextPageToken: PayloadAction<string>) => {
+      state.value.nextPageToken = nextPageToken.payload;
+    },
+
+    updateTotalResults: (state, totalResults: PayloadAction<number>) => {
+      state.value.totalResults = totalResults.payload;
     },
   },
 });
@@ -42,6 +57,8 @@ export const {
   updateSearchQuery,
   updateSearchSuggestions,
   updateSearchResults,
+  updateNextPageToken,
+  updateTotalResults,
 } = searchSlice.actions;
 
 export default searchSlice.reducer;

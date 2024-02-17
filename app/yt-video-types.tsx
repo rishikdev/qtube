@@ -1,4 +1,8 @@
 export type YTSearchResponse = {
+  nextPageToken: string;
+  pageInfo: {
+    totalResults: number;
+  };
   items: [YTVideoSearchResult];
 };
 
@@ -70,5 +74,28 @@ export type YTVideo = {
     likeCount: string;
     favoriteCount: string;
     commentCount: string;
+  };
+};
+
+export type PlaylistVideo = {
+  id: string;
+  title: string;
+  channelTitle: string;
+  thumbnails: {
+    default: {
+      url: string;
+      width: number;
+      height: number;
+    };
+    medium: {
+      url: string;
+      width: number;
+      height: number;
+    };
+    high: {
+      url: string;
+      width: number;
+      height: number;
+    };
   };
 };

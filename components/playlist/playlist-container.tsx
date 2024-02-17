@@ -1,41 +1,75 @@
 "use client";
 
-import ytData from "@/app/sample-youtube-search-result.json";
-import { useAppSelector } from "@/app/(state)/store";
+import { AppDispatch, useAppSelector } from "@/app/(state)/store";
 import Playlist from "./playlist";
 import EmptyPlaylistPage from "./empty-playlist-page";
-import {
-  themeCardOnGradientBG,
-  themeCardOnPlaneBG,
-  themeGradientText,
-} from "@/app/styles.module";
+import { themeGradientText } from "@/app/styles.module";
 import { cn } from "@/lib/utils";
+import { PlaylistVideo } from "@/app/yt-video-types";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import {
+  WatchPageStatus,
+  updateCurrentVideoId,
+  updateWatchPageStatus,
+} from "@/app/(state)/(slices)/watch-page-slice";
+import {
+  NavbarTrigger,
+  collapseNavbar,
+} from "@/app/(state)/(slices)/navbar-slice";
 
-const PlaylistContainer = () => {
+const PlaylistContainer = ({
+  height,
+  overflowBehaviour,
+}: {
+  height: string;
+  overflowBehaviour: string;
+}) => {
+  const dispatch = useDispatch<AppDispatch>();
   const playlistVideos = useAppSelector(
     (state) => state.playlistReducer.value.videos
   );
+  const currentVideoId = useAppSelector(
+    (state) => state.watchPageReducer.value.currentVideoId
+  );
+  const router = useRouter();
 
-  // const playlistVideos = ytData.items;
+  function handleOnClickPlayVideo(videoId: string) {
+    dispatch(updateCurrentVideoId(videoId));
+    dispatch(updateWatchPageStatus(WatchPageStatus.Loading));
+    dispatch(collapseNavbar(NavbarTrigger.PlaylistButton));
+    router.push(`/watch/${videoId}`);
+  }
 
   return (
-    <div id="playlist-container" className="h-full w-full">
+    <div id="playlist-container" className={cn("h-full w-full")}>
       {playlistVideos.length === 0 ? (
-        <EmptyPlaylistPage />
+        <EmptyPlaylistPage height={height} />
       ) : (
-        <div id="playlist" className="grid place-content-center h-full">
+        <div id="playlist" className="grid content-start h-full">
           <div
             className={cn(
-              "m-1 p-1 text-center drop-shadow-md",
-              themeCardOnGradientBG
+              "p-1 text-center drop-shadow-md cursor-default select-none"
             )}
           >
-            <div className={cn("text-2xl font-black", themeGradientText)}>
+            <div className={cn("text-2xl font-black ", themeGradientText)}>
               your playlist
             </div>
           </div>
-          <div className="h-full overflow-scroll">
-            <Playlist />
+          <div className={cn("mb-1 h-full", overflowBehaviour)}>
+            {playlistVideos.map((video: PlaylistVideo) => (
+              <div
+                key={video.id}
+                className="grid place-content-center"
+                onClick={() =>
+                  currentVideoId === video.id
+                    ? {}
+                    : handleOnClickPlayVideo(video.id)
+                }
+              >
+                <Playlist video={video} />
+              </div>
+            ))}
           </div>
         </div>
       )}

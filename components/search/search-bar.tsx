@@ -7,9 +7,11 @@ import { FormEvent, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { useDispatch } from "react-redux";
 import {
+  updateNextPageToken,
   updateSearchQuery,
   updateSearchResults,
   updateSearchSuggestions,
+  updateTotalResults,
 } from "@/app/(state)/(slices)/search-slice";
 import {
   NavbarTrigger,
@@ -69,39 +71,39 @@ const SearchBar = () => {
   );
 
   async function fetchSuggestions(searchQuery: string) {
-    dispatch(
-      updateSearchSuggestions(
-        [
-          "cats",
-          "cats meowing",
-          "cats eating",
-          "cats funny",
-          "cats fighting",
-          "cats eating food",
-          "cats funny videos",
-          "cats shorts",
-          "cats videos",
-          "cats watching tv",
-          "cats attacking",
-          "cats funny moments",
-          "cats loafing",
-        ].filter((suggestion) =>
-          suggestion.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      )
-    );
+    // dispatch(
+    //   updateSearchSuggestions(
+    //     [
+    //       "cats",
+    //       "cats meowing",
+    //       "cats eating",
+    //       "cats funny",
+    //       "cats fighting",
+    //       "cats eating food",
+    //       "cats funny videos",
+    //       "cats shorts",
+    //       "cats videos",
+    //       "cats watching tv",
+    //       "cats attacking",
+    //       "cats funny moments",
+    //       "cats loafing",
+    //     ].filter((suggestion) =>
+    //       suggestion.toLowerCase().includes(searchQuery.toLowerCase())
+    //     )
+    //   )
+    // );
 
-    // const response = await fetch("/api/suggestions", {
-    //   method: "POST",
-    //   body: JSON.stringify({ searchQuery: searchQuery }),
-    // });
+    const response = await fetch("/api/suggestions", {
+      method: "POST",
+      body: JSON.stringify({ searchQuery: searchQuery }),
+    });
 
-    // if (response.ok) {
-    //   const body = await response.json();
-    //   dispatch(updateSearchSuggestions(body.suggestions));
-    // } else {
-    //   // HANDLE THIS CASE
-    // }
+    if (response.ok) {
+      const body = await response.json();
+      dispatch(updateSearchSuggestions(body.suggestions));
+    } else {
+      // HANDLE THIS CASE
+    }
   }
 
   async function fetchVideos(e: FormEvent) {
@@ -110,18 +112,20 @@ const SearchBar = () => {
       return;
     }
 
-    // const response = await fetch("/api/search-results", {
-    //   method: "POST",
-    //   body: JSON.stringify({ searchQuery: localSearchQuery }),
-    // });
+    const response = await fetch("/api/search-results", {
+      method: "POST",
+      body: JSON.stringify({ searchQuery: localSearchQuery }),
+    });
 
-    // if (response.ok) {
-    //   const body = await response.json();
-    //   dispatch(updateSearchResults(body.searchResults));
-    dispatch(updateSearchSuggestions([]));
-    dispatch(collapseNavbar(NavbarTrigger.SearchButton));
-    // dispatch(updateHomePageStatus());
-    // }
+    if (response.ok) {
+      const body = await response.json();
+      dispatch(updateSearchResults(body.searchResults));
+      dispatch(updateNextPageToken(body.nextPageToken));
+      dispatch(updateTotalResults(body.totalResults));
+      dispatch(updateSearchSuggestions([]));
+      dispatch(collapseNavbar(NavbarTrigger.SearchButton));
+      dispatch(updateHomePageStatus());
+    }
   }
 
   function clearSearchBar() {

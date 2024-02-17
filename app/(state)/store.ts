@@ -6,7 +6,7 @@ import navbarSliceReducer from "./(slices)/navbar-slice";
 import searchReducer from "./(slices)/search-slice";
 import homePageReducer from "./(slices)/home-page-slice";
 import playlistReducer from "./(slices)/playlist-slice";
-import watchReducer from "./(slices)/watch-slice";
+import watchPageReducer from "./(slices)/watch-page-slice";
 
 export const store = configureStore({
   reducer: {
@@ -14,7 +14,7 @@ export const store = configureStore({
     searchReducer,
     homePageReducer,
     playlistReducer,
-    watchReducer,
+    watchPageReducer,
   },
 });
 

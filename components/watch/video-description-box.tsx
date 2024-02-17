@@ -6,7 +6,12 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
-import { themeHoverGradientLeftStop } from "@/app/styles.module";
+import {
+  themeCardOnGradientBG,
+  themeCardOnPlaneBG,
+  themeHoverGradientLeftStop,
+  themeHoverGradientRightStop,
+} from "@/app/styles.module";
 
 const VideoDescriptionBox = ({ video }: { video: YTVideo }) => {
   const hydrated = useHydration();
@@ -42,9 +47,9 @@ const VideoDescriptionBox = ({ video }: { video: YTVideo }) => {
   return (
     <div
       id="video-description-box"
-      className="grid gap-2 bg-gray-200 dark:bg-gray-800 p-2 rounded-lg"
+      className={cn("grid gap-2 p-2 rounded-lg", themeCardOnGradientBG)}
     >
-      <div className="flex gap-3 text-sm font-bold justify-between">
+      <div className="flex gap-3 text-xs font-bold justify-between">
         <p id="video-view-count" className="self-center">
           {humanReadableCount(video.statistics.viewCount, "view")}
         </p>
@@ -62,7 +67,7 @@ const VideoDescriptionBox = ({ video }: { video: YTVideo }) => {
         <Button
           variant="ghost"
           size="icon"
-          className={cn("p-1 hover:bg-gray-300 dark:hover:bg-gray-700")}
+          className={cn("p-1", themeHoverGradientRightStop)}
           onClick={() => setShowFullDescription(!showFullDescription)}
         >
           {showFullDescription ? (
@@ -73,9 +78,11 @@ const VideoDescriptionBox = ({ video }: { video: YTVideo }) => {
         </Button>
       </div>
       <p
-        className={`text-sm whitespace-pre-line overflow-scroll ${
-          showFullDescription ? "h-[10rem]" : "h-[0rem]"
-        } transition-all`}
+        className={`text-sm whitespace-pre-line overflow-y-scroll ${
+          showFullDescription && video.snippet.description.length != 0
+            ? "flex"
+            : "hidden"
+        }`}
       >
         {video.snippet.description}
       </p>

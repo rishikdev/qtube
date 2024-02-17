@@ -8,7 +8,10 @@ const NavbarPlaylistContainer = () => {
       id="navbar-playlist-container"
       className="h-full w-full invisible opacity-0"
     >
-      <PlaylistContainer />
+      <PlaylistContainer
+        height="h-[90%]"
+        overflowBehaviour="overflow-y-scroll"
+      />
     </div>
   );
 };

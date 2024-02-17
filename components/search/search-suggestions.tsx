@@ -10,7 +10,7 @@ import {
   updateSearchSuggestions,
 } from "@/app/(state)/(slices)/search-slice";
 import { AppDispatch, useAppSelector } from "@/app/(state)/store";
-import { YTVideoSearchResult } from "@/app/yt-video-types";
+import { YTVideo, YTVideoSearchResult } from "@/app/yt-video-types";
 import { cn } from "@/lib/utils";
 import { MoveUpLeft } from "lucide-react";
 import { useDispatch } from "react-redux";
@@ -24,27 +24,27 @@ const SearchSuggestions = () => {
     (state) => state.searchReducer.value.searchSuggestions
   );
 
-  // async function fetchVideos(suggestion: string) {
-  //   const response = await fetch("/api/search-results", {
-  //     method: "POST",
-  //     body: JSON.stringify({ searchQuery: suggestion }),
-  //   });
-
-  //   if (response.ok) {
-  //     const body = await response.json();
-  //     const searchResults = body.searchResults as [YTVideo];
-  //     dispatch(updateSearchQuery(suggestion));
-  //     dispatch(updateSearchSuggestions([]));
-  //     dispatch(updateSearchResults(searchResults));
-  //     dispatch(collapseNavbar(NavbarTrigger.SearchButton));
-  //     dispatch(updateHomePageStatus());
-  //   }
-  // }
-
   async function fetchVideos(suggestion: string) {
-    dispatch(updateSearchQuery(suggestion));
-    dispatch(collapseNavbar(NavbarTrigger.SearchButton));
+    const response = await fetch("/api/search-results", {
+      method: "POST",
+      body: JSON.stringify({ searchQuery: suggestion }),
+    });
+
+    if (response.ok) {
+      const body = await response.json();
+      const searchResults = body.searchResults;
+      dispatch(updateSearchQuery(suggestion));
+      dispatch(updateSearchSuggestions([]));
+      dispatch(updateSearchResults(searchResults));
+      dispatch(collapseNavbar(NavbarTrigger.SearchButton));
+      dispatch(updateHomePageStatus());
+    }
   }
+
+  // async function fetchVideos(suggestion: string) {
+  //   dispatch(updateSearchQuery(suggestion));
+  //   dispatch(collapseNavbar(NavbarTrigger.SearchButton));
+  // }
 
   function appendSuggestion(suggestion: string) {
     dispatch(updateSearchQuery(suggestion + " "));
