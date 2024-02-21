@@ -8,7 +8,6 @@ export async function POST(request: Request) {
   try {
     const response = await fetch(apiUrl);
     const data = (await response.json()) as YTVideoResponse;
-    console.log("data:", data);
     return new Response(
       JSON.stringify({
         video: data.items[0],
