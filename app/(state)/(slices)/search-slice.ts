@@ -9,7 +9,6 @@ interface SearchBarState {
     searchSuggestions: string[];
     searchResults: YTVideoSearchResult[];
     nextPageToken: string;
-    totalResults: number;
   };
 }
 
@@ -19,7 +18,6 @@ const initialState: SearchBarState = {
     searchSuggestions: [],
     searchResults: [],
     nextPageToken: "",
-    totalResults: 0,
   },
 };
 
@@ -46,10 +44,6 @@ export const searchSlice = createSlice({
     updateNextPageToken: (state, nextPageToken: PayloadAction<string>) => {
       state.value.nextPageToken = nextPageToken.payload;
     },
-
-    updateTotalResults: (state, totalResults: PayloadAction<number>) => {
-      state.value.totalResults = totalResults.payload;
-    },
   },
 });
 
@@ -58,7 +52,6 @@ export const {
   updateSearchSuggestions,
   updateSearchResults,
   updateNextPageToken,
-  updateTotalResults,
 } = searchSlice.actions;
 
 export default searchSlice.reducer;

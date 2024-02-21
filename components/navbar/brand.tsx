@@ -1,10 +1,12 @@
 "use client";
 
-import { updateHomePageStatus } from "@/app/(state)/(slices)/home-page-slice";
+import {
+  HomePageStatus,
+  updateHomePageStatus,
+} from "@/app/(state)/(slices)/home-page-slice";
 import {
   updateNextPageToken,
   updateSearchResults,
-  updateTotalResults,
 } from "@/app/(state)/(slices)/search-slice";
 import { AppDispatch } from "@/app/(state)/store";
 import { themeHoverGradientLeftStop } from "@/app/styles.module";
@@ -16,22 +18,48 @@ import {
   NavbarTrigger,
   collapseNavbar,
 } from "@/app/(state)/(slices)/navbar-slice";
+import { YTSearchResponse } from "@/app/yt-video-types";
 
 const Brand = () => {
   const dispatch = useDispatch<AppDispatch>();
 
-  async function loadHomePage() {
+  async function handleSearch() {
+    const promises: Promise<YTSearchResponse | undefined>[] = [];
+    try {
+      promises.push(loadHomePage());
+    } catch (error) {}
+
+    Promise.all(promises).then((responses) => {
+      if (responses != undefined) {
+        responses.forEach((response) => {
+          if (response != undefined) {
+            dispatch(updateSearchResults(response.items));
+            dispatch(updateNextPageToken(response.nextPageToken));
+            dispatch(updateHomePageStatus(HomePageStatus.LoadingComplete));
+          }
+        });
+      }
+    });
+  }
+
+  async function loadHomePage(): Promise<YTSearchResponse | undefined> {
+    dispatch(updateHomePageStatus(HomePageStatus.Loading));
+    dispatch(collapseNavbar(NavbarTrigger.Brand));
+
     const response = await fetch("/api/search-results", {
       method: "POST",
       body: JSON.stringify({ searchQuery: "", nextPageToken: "" }),
     });
+
     if (response.ok) {
       const body = await response.json();
-      dispatch(updateSearchResults(body.searchResults));
-      dispatch(updateNextPageToken(body.nextPageToken));
-      dispatch(updateTotalResults(body.totalResults));
-      dispatch(updateHomePageStatus());
-      dispatch(collapseNavbar(NavbarTrigger.Brand));
+      if (body.items != undefined) {
+        return body;
+      } else {
+        dispatch(updateHomePageStatus(HomePageStatus.Error));
+      }
+    } else {
+      dispatch(updateHomePageStatus(HomePageStatus.Error));
     }
   }
 
@@ -39,7 +67,7 @@ const Brand = () => {
     <Button
       asChild
       variant="ghost"
-      onClick={loadHomePage}
+      onClick={handleSearch}
       className={cn(
         "m-1 transition-all cursor-pointer",
         themeHoverGradientLeftStop

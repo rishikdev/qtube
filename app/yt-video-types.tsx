@@ -1,8 +1,5 @@
 export type YTSearchResponse = {
   nextPageToken: string;
-  pageInfo: {
-    totalResults: number;
-  };
   items: [YTVideoSearchResult];
 };
 

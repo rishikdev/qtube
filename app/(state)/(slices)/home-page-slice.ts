@@ -1,10 +1,12 @@
 "use client";
 
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 export enum HomePageStatus {
   Fresh,
-  Returning,
+  Loading,
+  LoadingComplete,
+  Error,
 }
 
 interface HomePageState {
@@ -23,8 +25,8 @@ export const homePageSlice = createSlice({
   name: "homePageSlice",
   initialState,
   reducers: {
-    updateHomePageStatus(state) {
-      state.value.homePageStatus = HomePageStatus.Returning;
+    updateHomePageStatus(state, newStatus: PayloadAction<HomePageStatus>) {
+      state.value.homePageStatus = newStatus.payload;
     },
   },
 });

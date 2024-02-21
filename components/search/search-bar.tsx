@@ -11,19 +11,22 @@ import {
   updateSearchQuery,
   updateSearchResults,
   updateSearchSuggestions,
-  updateTotalResults,
 } from "@/app/(state)/(slices)/search-slice";
 import {
   NavbarTrigger,
   collapseNavbar,
 } from "@/app/(state)/(slices)/navbar-slice";
-import { Search, SearchCheck, X, XCircle } from "lucide-react";
+import { Search, XCircle } from "lucide-react";
 import { Button } from "../ui/button";
-import { updateHomePageStatus } from "@/app/(state)/(slices)/home-page-slice";
+import {
+  HomePageStatus,
+  updateHomePageStatus,
+} from "@/app/(state)/(slices)/home-page-slice";
 import {
   themeHoverGradientLeftStop,
   themeHoverGradientRightStop,
 } from "@/app/styles.module";
+import { YTSearchResponse } from "@/app/yt-video-types";
 
 const SearchBar = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -92,7 +95,6 @@ const SearchBar = () => {
     //     )
     //   )
     // );
-
     const response = await fetch("/api/suggestions", {
       method: "POST",
       body: JSON.stringify({ searchQuery: searchQuery }),
@@ -100,31 +102,52 @@ const SearchBar = () => {
 
     if (response.ok) {
       const body = await response.json();
-      dispatch(updateSearchSuggestions(body.suggestions));
-    } else {
-      // HANDLE THIS CASE
+      if (body.suggestions != undefined) {
+        dispatch(updateSearchSuggestions(body.suggestions));
+      }
     }
   }
 
-  async function fetchVideos(e: FormEvent) {
+  async function handleSearch(e: FormEvent) {
     e.preventDefault();
-    if (localSearchQuery.trim() === "") {
-      return;
-    }
+    const promises: Promise<YTSearchResponse | undefined>[] = [];
+    try {
+      promises.push(fetchVideos());
+    } catch (error) {}
 
-    const response = await fetch("/api/search-results", {
-      method: "POST",
-      body: JSON.stringify({ searchQuery: localSearchQuery }),
+    Promise.all(promises).then((responses) => {
+      if (responses != undefined) {
+        responses.forEach((response) => {
+          if (response != undefined) {
+            dispatch(updateSearchSuggestions([]));
+            dispatch(updateSearchResults(response.items));
+            dispatch(updateNextPageToken(response.nextPageToken));
+            dispatch(updateHomePageStatus(HomePageStatus.LoadingComplete));
+          }
+        });
+      }
     });
+  }
 
-    if (response.ok) {
-      const body = await response.json();
-      dispatch(updateSearchResults(body.searchResults));
-      dispatch(updateNextPageToken(body.nextPageToken));
-      dispatch(updateTotalResults(body.totalResults));
-      dispatch(updateSearchSuggestions([]));
-      dispatch(collapseNavbar(NavbarTrigger.SearchButton));
-      dispatch(updateHomePageStatus());
+  async function fetchVideos(): Promise<YTSearchResponse | undefined> {
+    dispatch(updateHomePageStatus(HomePageStatus.Loading));
+    dispatch(collapseNavbar(NavbarTrigger.SearchButton));
+
+    if (localSearchQuery.trim() != "") {
+      const response = await fetch("/api/search-results", {
+        method: "POST",
+        body: JSON.stringify({ searchQuery: localSearchQuery }),
+      });
+      if (response.ok) {
+        const body = await response.json();
+        if (body.items != undefined) {
+          return body;
+        } else {
+          dispatch(updateHomePageStatus(HomePageStatus.Error));
+        }
+      } else {
+        dispatch(updateHomePageStatus(HomePageStatus.Error));
+      }
     }
   }
 
@@ -140,14 +163,14 @@ const SearchBar = () => {
       <Button
         variant="ghost"
         size="icon"
-        onClick={fetchVideos}
+        onClick={handleSearch}
         disabled={globalSearchQuery.trim().length === 0}
         id="append-suggestion"
         className={cn("flex-none", themeHoverGradientLeftStop)}
       >
         <Search className="h-[1.2rem] w-[1.2rem]" />
       </Button>
-      <form onSubmit={fetchVideos} className="grid w-full">
+      <form onSubmit={handleSearch} className="grid w-full">
         <Input
           type="text"
           placeholder="Search..."
