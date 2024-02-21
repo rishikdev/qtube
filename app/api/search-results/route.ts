@@ -11,6 +11,7 @@ export async function POST(request: Request) {
     parameters = parameters + `&pageToken=${body.nextPageToken}`;
   }
   const apiUrl = `${process.env.YOUTUBE_SEARCH_API}&${parameters}&key=${process.env.YOUTUBE_API_KEY}`;
+  console.log("apiUrl:", apiUrl);
   try {
     const response = await fetch(apiUrl);
     const data = (await response.json()) as YTSearchResponse;
